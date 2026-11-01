@@ -65,9 +65,9 @@ def search_in_dictionary(words, table):
             )
 
         result.append(searched)
-
+        print(f"-----------{result}")
     con.close()
-    log.debug("Соединение с базой данных закрыто.")
+    log.debug("DB connection closed")
     flattened = list()
     if ru:
         for word_and_translation in result:  # [('человек', 'person, people; man'), ... ]
@@ -79,13 +79,17 @@ def search_in_dictionary(words, table):
         for word_and_translation in result:
             print(word_and_translation)
             for meaning in word_and_translation:
-                print(meaning)
+                print(meaning)                  # CLEAN PRINTS
+                print("------", meaning[0])
                 for elem in meaning[0].replace(";", ",").split(","):
+                    print(elem)
+                    print((elem.strip(), meaning[1],  meaning[-1]))
                     flattened.append((elem.strip(), meaning[1],  meaning[-1]))
 
     # Short (more appropriate) words become first
     # Added x[0] not in words to return imputed word firstly
     flattened = sorted(flattened, key=lambda x: (x[0] not in words, len(x[0])))
+    print(flattened)
 
     log.info(f"Успешно обработано. Итоговый список (всего {len(flattened)}):")
 

@@ -15,4 +15,7 @@ class UserSession:
     def is_authenticated(self):
         return self.current_user_id is not None
 
+    def get_user_id(self):
+        return self.current_user_id
+
 state = UserSession()

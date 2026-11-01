@@ -2,6 +2,7 @@ import sqlite3
 from pathlib import Path
 
 import bcrypt
+import mariadb
 
 from Config.logger_config import log
 
@@ -10,18 +11,20 @@ base_dir = Path(__file__).resolve().parent.parent
 DB_PATH = base_dir / "Databases" / "russian_dictionary.db"
 USERS_DB_PATH = base_dir / "Databases" / "users.db"
 
+conn_params = {
+            "host": 'localhost',
+            "user": 'admin',
+            "password": 'G2g3ZJYlDkrFSo',
+            "database": "my_database"
+        }
 
-
-
-def get_connection():
-    return sqlite3.connect(USERS_DB_PATH)
 
 
 def check_user(login):
-    with get_connection() as conn:
-        cursor = conn.cursor()
-        cursor.execute("SELECT id FROM users WHERE login = ?", (login,))
-        return cursor.fetchone() is not None
+    with mariadb.connect(**conn_params) as conn:
+        with conn.cursor() as cursor:
+            cursor.execute("SELECT id FROM users WHERE login = ?", (login,))
+            return cursor.fetchone() is not None
 
 
 def register_user(login, password):
@@ -31,23 +34,23 @@ def register_user(login, password):
         return False, "Password must be at least 3 symblos"
 
     try:
-        with get_connection() as conn:
-            cursor = conn.cursor()
+        with mariadb.connect(**conn_params) as conn:
+            with conn.cursor() as cursor:
 
-            if check_user(login):
-                return False, "User with this login is already exist"
+                if check_user(login):
+                    return False, "User with this login is already exist"
 
-            hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+                hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
 
-            cursor.execute(
-                "INSERT INTO users (login, password_hash) VALUES (?, ?)",
-                (login, hashed_password.decode('utf-8'))
-            )
-            conn.commit()
+                cursor.execute(
+                    "INSERT INTO users (login, password_hash) VALUES (?, ?)",
+                    (login, hashed_password.decode('utf-8'))
+                )
+                conn.commit()
 
-            new_user_id = cursor.lastrowid
+                new_user_id = cursor.lastrowid
 
-            return True, new_user_id
+                return True, new_user_id
 
     except sqlite3.IntegrityError:
         log.warning(f"Attempt to register existing login: '{login}'")
@@ -59,31 +62,33 @@ def register_user(login, password):
 
 def login_user(login, password):
     try:
-        with get_connection() as conn:
-            cursor = conn.cursor()
+        with mariadb.connect(**conn_params) as conn:
+            with conn.cursor() as cursor:
+                cursor.execute("SELECT id, password_hash FROM users WHERE login = ?", (login,))
+                user_data = cursor.fetchone()
 
-            cursor.execute("SELECT id, password_hash FROM users WHERE login = ?", (login,))
-            user_data = cursor.fetchone()
+                if user_data is None:
+                    return False, "no_data"
 
-            if user_data is None:
-                return False, "no_data"
+                user_id, bd_pass = user_data
 
-            user_id, bd_pass = user_data
+                # Password checking
+                is_valid = bcrypt.checkpw(
+                    password.encode('utf-8'),
+                    bd_pass.encode('utf-8')
+                )
 
-            # Password checking
-            is_valid = bcrypt.checkpw(
-                password.encode('utf-8'),
-                bd_pass.encode('utf-8')
-            )
+                if is_valid:
+                    log.info("Checking passed")
+                    return True, user_id
 
-            if is_valid:
-                log.info("Checking passed")
-                return True, user_id
+                else:
+                    log.info("Wrong password")
+                    return False, "Wrong answer"
 
-            else:
-                log.info("Wrong password")
-                return False, "Wrong answer"
-
-    except sqlite3.Error as e:
+    except mariadb.Error as e:
         log.error(f"Db Error: {e}")
         return False, "Error"
+
+
+print(check_user("zabiv"))

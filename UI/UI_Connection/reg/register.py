@@ -5,7 +5,7 @@ from PyQt6.QtWidgets import QApplication, QDialog
 from Config.logger_config import log
 from Core.identification import register_user
 from Core.session import state
-from UI.UI_Connection.reg.title_window import Title
+from UI.UI_Connection.title_window import Title
 
 
 class SignUp(QDialog):

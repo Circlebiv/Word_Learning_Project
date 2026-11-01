@@ -6,7 +6,7 @@ from PyQt6.QtWidgets import QApplication, QDialog
 from Core.identification import login_user
 from Core.session import state
 from UI.UI_Connection.reg.register import SignUp
-from UI.UI_Connection.reg.title_window import Title
+from UI.UI_Connection.title_window import Title
 
 from Config.logger_config import log
 
