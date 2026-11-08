@@ -1,11 +1,8 @@
-import logging
 import re
 import sqlite3
-import sys
 from pathlib import Path
 
 from Config.logger_config import log
-
 
 
 def search_in_dictionary(words, table):
@@ -37,6 +34,7 @@ def search_in_dictionary(words, table):
 
     cur = con.cursor()
     for word in words:
+        word = word.lower()
         if table == 'All':
             searched = cur.execute(f"""SELECT * FROM (
                                         SELECT {wtf_search[0]}, {wtf_search[1]}, 'noun' AS source_table FROM nouns
@@ -79,19 +77,19 @@ def search_in_dictionary(words, table):
         for word_and_translation in result:
             print(word_and_translation)
             for meaning in word_and_translation:
-                print(meaning)                  # CLEAN PRINTS
+                print(meaning)  # CLEAN PRINTS
                 print("------", meaning[0])
                 for elem in meaning[0].replace(";", ",").split(","):
                     print(elem)
-                    print((elem.strip(), meaning[1],  meaning[-1]))
-                    flattened.append((elem.strip(), meaning[1],  meaning[-1]))
+                    print((elem.strip(), meaning[1], meaning[-1]))
+                    flattened.append((elem.strip(), meaning[1], meaning[-1]))
 
     # Short (more appropriate) words become first
     # Added x[0] not in words to return imputed word firstly
     flattened = sorted(flattened, key=lambda x: (x[0] not in words, len(x[0])))
     print(flattened)
 
-    log.info(f"Успешно обработано. Итоговый список (всего {len(flattened)}):")
+    log.info(f"Success result list (всего {len(flattened)}):")
 
     # for elem in flattened:
     #     logger.info(f"Выбрано: {elem}")

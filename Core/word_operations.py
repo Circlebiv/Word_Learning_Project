@@ -1,5 +1,6 @@
 import os
 from datetime import datetime
+from tokenize import group
 
 from dotenv import load_dotenv
 from sqlalchemy import String, INTEGER, create_engine, URL, ForeignKey, select
@@ -55,38 +56,53 @@ class LearnedWords(Base):
     word: Mapped[str] = mapped_column(String(255))
     translation: Mapped[str] = mapped_column(String(255))
     group_name: Mapped[str] = mapped_column(String(255))
+    user_folder_name: Mapped[str] = mapped_column(String(255))
     progress: Mapped[int] = mapped_column(default=0)
     last_review: Mapped[datetime] = mapped_column(default=datetime.now)
     is_learned: Mapped[bool] = mapped_column(default=False)
 
     def __repr__(self) -> str:
-        return (f"User(id={self.id!r}, word={self.word!r}, progress={self.progress!r}, last_review={self.last_review!r}"
-                f", is_learned={self.is_learned!r})")
+        return (
+            f"LearnedWords(id={self.id!r}, word={self.word!r}, translation={self.translation!r}, progress={self.progress!r}, last_review={self.last_review!r}"
+            f", group_name={self.group_name!r}, user_table_name={self.user_folder_name!r}, is_learned={self.is_learned!r})")
 
 
 Base.metadata.create_all(engine)
 
 
-def add_user_word(word, trans, user_id, table="general"):
+def get_all_user_words(user_id):
+    with Session(engine) as session:
+        stmt = select(LearnedWords).where(
+            LearnedWords.user_id == user_id,
+        )
+
+        user_words = session.execute(stmt).scalars().all()
+        return user_words
+
+
+def add_user_word(word, trans, user_id, group, folder="general"):
     with Session(engine) as session:
         # Checking if word were added
         # UPGRADE_SETTINGS: IF TRIGGER CANCEL WORD'S PROGRESS
         stmt = select(LearnedWords).where(
             LearnedWords.word == word,
             LearnedWords.user_id == user_id,
-            LearnedWords.group_name == table
+            LearnedWords.translation == trans,
+            LearnedWords.group_name == group,
+            LearnedWords.user_folder_name == folder
         )
 
         existing_word = session.execute(stmt).scalar_one_or_none()
 
         if existing_word:
-            log.info(f"Word '{word}' already added to user: {user_id} in group: '{table}'")
+            log.info(f"Word '{word}' already added to user: {user_id} in group: '{folder}'")
             return
 
         new_string = LearnedWords(
             word=word,
             translation=trans,
-            group_name=table,
+            group_name=group,
+            user_folder_name=folder,
             user_id=user_id
 
         )
