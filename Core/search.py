@@ -5,10 +5,12 @@ from pathlib import Path
 from Config.logger_config import log
 
 
-def search_in_dictionary(words, table):
+def search_in_dictionary(words, table, is_phrasal):
     log.info(f"Получена строка для поиска: '{words}'")
     base_dir = Path(__file__).resolve().parent.parent
     db_path = base_dir / "Databases" / "russian_dictionary.db"
+
+
 
     ru = False
     en = False
@@ -28,13 +30,12 @@ def search_in_dictionary(words, table):
         log.error(f"Файл базы данных не найден по пути: {db_path}")
         return list()
 
-    words = words.replace(',', '').replace('.', '').split()
+    words = [w.strip() for w in words.lower().replace('.', '').split(',')]
     con = sqlite3.connect(db_path)
     result = list()
 
     cur = con.cursor()
     for word in words:
-        word = word.lower()
         if table == 'All':
             searched = cur.execute(f"""SELECT * FROM (
                                         SELECT {wtf_search[0]}, {wtf_search[1]}, 'noun' AS source_table FROM nouns
@@ -45,14 +46,14 @@ def search_in_dictionary(words, table):
                                         UNION ALL
                                         SELECT {wtf_search[0]}, {wtf_search[1]}, 'adjectives' AS source_table FROM adjectives
                                         ) 
-                                        WHERE {wtf_search[0]} LIKE '%{word}%'
+                                        WHERE {wtf_search[0]} LIKE ?
 
-                                                """).fetchall()
+                                                """, (f'%{word}%',)).fetchall()
         else:
             searched = cur.execute(f"""SELECT {wtf_search[0]}, {wtf_search[1]}
                                         FROM {table}
-                                        WHERE {wtf_search[0]} LIKE '%{word}%'
-                                        """).fetchall()
+                                        WHERE {wtf_search[0]} LIKE ?
+                                        """,(f'%{word}%',)).fetchall()
         if searched:
             log.info(
                 f"Для слова '{word}' найдено совпадений в БД: {len(searched)}"
@@ -71,7 +72,8 @@ def search_in_dictionary(words, table):
         for word_and_translation in result:  # [('человек', 'person, people; man'), ... ]
             for meaning in word_and_translation:
                 for elem in meaning[1].replace(";", ",").split(","):
-                    flattened.append((meaning[0], elem, meaning[-1]))
+                    if (is_phrasal and elem.count(" ") == 0) or not is_phrasal:
+                        flattened.append((meaning[0], elem, meaning[-1]))
     elif en:
         print(result)
         for word_and_translation in result:
@@ -80,13 +82,19 @@ def search_in_dictionary(words, table):
                 print(meaning)  # CLEAN PRINTS
                 print("------", meaning[0])
                 for elem in meaning[0].replace(";", ",").split(","):
-                    print(elem)
+                    print(f"zzzzz {elem}")
                     print((elem.strip(), meaning[1], meaning[-1]))
-                    flattened.append((elem.strip(), meaning[1], meaning[-1]))
+                    if any(word in elem for word in  words): #Fixed search bug
+                        print(f"yyyyy {elem}")
+                        if (is_phrasal and (elem.strip().count(" ") != 0 or elem.strip().count("-") != 0)) or not is_phrasal:
+                            flattened.append((elem.strip(), meaning[1], meaning[-1]))
 
     # Short (more appropriate) words become first
     # Added x[0] not in words to return imputed word firstly
+    print(flattened)
     flattened = sorted(flattened, key=lambda x: (x[0] not in words, len(x[0])))
+
+
     print(flattened)
 
     log.info(f"Success result list (всего {len(flattened)}):")

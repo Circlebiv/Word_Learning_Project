@@ -48,7 +48,7 @@
      <item row="0" column="0" colspan="3">
       <widget class="QStackedWidget" name="stackedWidget">
        <property name="currentIndex">
-        <number>1</number>
+        <number>0</number>
        </property>
        <widget class="QWidget" name="page_3">
         <widget class="QLineEdit" name="searchline">
@@ -100,7 +100,7 @@
          <property name="geometry">
           <rect>
            <x>20</x>
-           <y>60</y>
+           <y>90</y>
            <width>781</width>
            <height>411</height>
           </rect>
@@ -127,6 +127,19 @@
            <width>79</width>
            <height>26</height>
           </rect>
+         </property>
+        </widget>
+        <widget class="QCheckBox" name="is_phrasal">
+         <property name="geometry">
+          <rect>
+           <x>20</x>
+           <y>40</y>
+           <width>151</width>
+           <height>23</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Phrasal verb</string>
          </property>
         </widget>
        </widget>

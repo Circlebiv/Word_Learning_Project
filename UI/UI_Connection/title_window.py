@@ -20,21 +20,14 @@ class Title(QMainWindow):
 
         self.selected_table = self.table_chooser.currentText()
 
+        self.is_phrasal.setChecked(False)
+
         self.model = QStandardItemModel()
         self.model.setHorizontalHeaderLabels(["Word", "Translation", "Word progress", "Last review"])
         self.tree = self.treeView
         self.tree.setModel(self.model)
-        # parent_item = QStandardItem("Mammals")
-        # parent_item_desc = QStandardItem("Warm-blooded animals")
-        # model.appendRow([parent_item, parent_item_desc])
-        #
-        # child1 = QStandardItem("Cat")
-        # child1_desc = QStandardItem("A small domesticated carnivore")
-        # parent_item.appendRow([child1, child1_desc])
+
         self.to_fill_tree()
-
-        # self.tree.expanded.connect(self.on_item_expanded)
-
         # self.searchline.textChanged.connect(self.search_function)
 
         self.searched_words_table.setSortingEnabled(True)  # Сортировка кликом по заголовку
@@ -81,10 +74,10 @@ class Title(QMainWindow):
 
     def search_function(self):
         text = self.searchline.text().strip()
-
+        is_it_phrase = self.is_phrasal.isChecked()
         # print(f"----------{text} {self.selected_table}")
 
-        found_words = search_in_dictionary(text, self.selected_table)
+        found_words = search_in_dictionary(text, self.selected_table, is_it_phrase)
         self.searched_words_table.clear()
         self.searched_words_table.setRowCount(len(found_words))  # Bug fixed why -1 ?
         self.searched_words_table.setColumnCount(3)
