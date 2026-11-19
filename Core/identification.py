@@ -2,9 +2,12 @@ import sqlite3
 from pathlib import Path
 
 import bcrypt
+import keyring
 import mariadb
+from PyQt6.QtCore import QSettings
 
 from Config.logger_config import log
+from Core.session import state
 
 base_dir = Path(__file__).resolve().parent.parent
 
@@ -12,12 +15,42 @@ DB_PATH = base_dir / "Databases" / "russian_dictionary.db"
 USERS_DB_PATH = base_dir / "Databases" / "users.db"
 
 conn_params = {
-            "host": 'localhost',
-            "user": 'admin',
-            "password": 'G2g3ZJYlDkrFSo',
-            "database": "my_database"
-        }
+    "host": 'localhost',
+    "user": 'admin',
+    "password": 'G2g3ZJYlDkrFSo',
+    "database": "my_database"
+}
 
+
+def forget_user(user_id):
+    settings = QSettings("MyCompany", "MyApp")
+    is_remembered = settings.value("login/remember_me")
+    saved_username = settings.value("login/last_username")
+    saved_user_id = settings.value("login/user_id", type=int)
+
+
+    if is_remembered and saved_username and saved_user_id == user_id:
+        settings.setValue("login/remember_me", False)
+
+        log.info("Has forgotten successfully")
+    else:
+        log.error("No such user")
+
+def is_remember_me_active():
+    settings = QSettings("MyCompany", "MyApp")
+    is_remembered = settings.value("login/remember_me", False, type=bool)
+    saved_username = settings.value("login/last_username")
+    saved_user_id = settings.value("login/user_id")
+
+    if is_remembered and saved_username and saved_user_id:
+
+        saved_password = keyring.get_password("MyApp", saved_user_id)
+        if saved_password:
+            success, result = login_user(saved_username, saved_password)
+            if success:
+                state.log_in(user_id=result, login=saved_username)
+                return True
+    return False
 
 
 def check_user(login):
@@ -27,7 +60,7 @@ def check_user(login):
             return cursor.fetchone() is not None
 
 
-def register_user(login, password):
+def register_user(login, password, nickname):
     if not login or len(login) < 3:
         return False, "Login must be at least 3 symblos"
     if not password or len(password) < 3:
@@ -36,15 +69,14 @@ def register_user(login, password):
     try:
         with mariadb.connect(**conn_params) as conn:
             with conn.cursor() as cursor:
-
                 if check_user(login):
                     return False, "User with this login is already exist"
 
                 hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
 
                 cursor.execute(
-                    "INSERT INTO users (login, password_hash) VALUES (?, ?)",
-                    (login, hashed_password.decode('utf-8'))
+                    "INSERT INTO users (login, nickname, password_hash) VALUES (?, ?, ?)",
+                    (login, nickname, hashed_password.decode('utf-8'))
                 )
                 conn.commit()
 

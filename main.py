@@ -3,20 +3,31 @@ import sys
 
 from PyQt6.QtWidgets import QApplication
 
+from Core.identification import is_remember_me_active
 from UI.UI_Connection.reg.login import Login
+from UI.UI_Connection.title_window import Title
+from Config.logger_config import log
+
 
 logging.basicConfig(
-    level=logging.DEBUG,  # Переключатель: DEBUG (покажет всё), INFO (только важное)
+    level=logging.DEBUG,
     format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
     handlers=[
-        logging.StreamHandler(sys.stdout)  # Указывает выводить логи в консоль
+        logging.StreamHandler(sys.stdout)
     ],
 )
 
 def main():
     app = QApplication([])
-    login_window = Login()
-    login_window.show()
+    if is_remember_me_active():
+        log.info("User recognized. Skipping Login")
+        window = Title()
+    else:
+        log.info("No user recognized. Opening Login")
+        window = Login()
+
+
+    window.show()
     app.exec()
 
 

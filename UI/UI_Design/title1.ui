@@ -48,7 +48,7 @@
      <item row="0" column="0" colspan="3">
       <widget class="QStackedWidget" name="stackedWidget">
        <property name="currentIndex">
-        <number>0</number>
+        <number>1</number>
        </property>
        <widget class="QWidget" name="page_3">
         <widget class="QLineEdit" name="searchline">
@@ -144,7 +144,7 @@
         </widget>
        </widget>
        <widget class="QWidget" name="page">
-        <widget class="QWidget" name="">
+        <widget class="QWidget" name="layoutWidget">
          <property name="geometry">
           <rect>
            <x>30</x>
@@ -205,6 +205,19 @@
          </property>
          <property name="text">
           <string>CheckBox</string>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="forget_me_btn">
+         <property name="geometry">
+          <rect>
+           <x>80</x>
+           <y>150</y>
+           <width>91</width>
+           <height>26</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Forget me</string>
          </property>
         </widget>
        </widget>

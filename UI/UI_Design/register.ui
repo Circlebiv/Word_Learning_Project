@@ -31,13 +31,13 @@
     <string>Sign up</string>
    </property>
   </widget>
-  <widget class="QWidget" name="">
+  <widget class="QWidget" name="layoutWidget">
    <property name="geometry">
     <rect>
      <x>80</x>
-     <y>140</y>
-     <width>331</width>
-     <height>271</height>
+     <y>110</y>
+     <width>341</width>
+     <height>311</height>
     </rect>
    </property>
    <layout class="QGridLayout" name="gridLayout">
@@ -52,34 +52,48 @@
      <widget class="QLineEdit" name="login"/>
     </item>
     <item row="1" column="0">
+     <widget class="QLabel" name="label_7">
+      <property name="text">
+       <string>Your nickname</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="1">
+     <widget class="QLineEdit" name="nickname">
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="0">
      <widget class="QLabel" name="label_4">
       <property name="text">
        <string>Your password</string>
       </property>
      </widget>
     </item>
-    <item row="1" column="1">
+    <item row="2" column="1">
      <widget class="QLineEdit" name="password"/>
     </item>
-    <item row="2" column="0">
+    <item row="3" column="0">
      <widget class="QLabel" name="label_6">
       <property name="text">
        <string>Confirm password</string>
       </property>
      </widget>
     </item>
-    <item row="2" column="1">
+    <item row="3" column="1">
      <widget class="QLineEdit" name="confirm_password"/>
     </item>
-    <item row="3" column="0">
+    <item row="4" column="0">
      <widget class="QPushButton" name="sign_up_button">
       <property name="text">
        <string>Sign up</string>
       </property>
      </widget>
     </item>
-    <item row="3" column="1">
-     <widget class="QCheckBox" name="checkBox">
+    <item row="4" column="1">
+     <widget class="QCheckBox" name="is_remember_me_reg">
       <property name="text">
        <string>Remember me</string>
       </property>

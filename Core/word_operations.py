@@ -46,6 +46,8 @@ class User(Base):
     login: Mapped[str] = mapped_column(String(255), unique=True)
     password_hash: Mapped[str] = mapped_column(String(255))
     registration_date: Mapped[datetime] = mapped_column(default=datetime.now)
+    nickname: Mapped[str] = mapped_column(String(255))
+
 
 
 class LearnedWords(Base):
@@ -69,6 +71,14 @@ class LearnedWords(Base):
 
 Base.metadata.create_all(engine)
 
+def get_nickname(login):
+    with Session(engine) as session:
+        stmt = select(User.nickname).where(
+            User.login == login,
+        )
+        nickname = session.execute(stmt).scalar()
+
+        return nickname
 
 def get_all_user_words(user_id):
     with Session(engine) as session:

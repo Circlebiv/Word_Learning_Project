@@ -3,8 +3,9 @@ from PyQt6.QtGui import QStandardItem, QStandardItemModel
 from PyQt6.QtWidgets import QApplication, QMainWindow, QDialog, QHeaderView, QTableWidgetItem, QPushButton
 from PyQt6.QtCore import Qt
 from Core.search import search_in_dictionary
-from Core.session import state
+from Core.session import state, UserSession
 from Core.word_operations import add_user_word, get_all_user_words
+from Core.identification import forget_user
 
 from Config.logger_config import log
 
@@ -30,7 +31,14 @@ class Title(QMainWindow):
         self.to_fill_tree()
         # self.searchline.textChanged.connect(self.search_function)
 
-        self.searched_words_table.setSortingEnabled(True)  # Сортировка кликом по заголовку
+        self.searched_words_table.setSortingEnabled(True)  # Sorting with click on heading
+
+        self.forget_me_btn.clicked.connect(self.handle_forget_me)
+
+    def handle_forget_me(self):
+        log.info("Send to executor function")
+        print(state.get_user_id())
+        forget_user(state.get_user_id())
 
     def clear_tree(self):
         self.model.clear()
