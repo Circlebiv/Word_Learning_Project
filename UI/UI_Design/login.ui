@@ -85,6 +85,13 @@
    </layout>
   </widget>
  </widget>
+ <tabstops>
+  <tabstop>login_input</tabstop>
+  <tabstop>password</tabstop>
+  <tabstop>login_button</tabstop>
+  <tabstop>no_acc_button</tabstop>
+  <tabstop>is_remember_me_log</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>
