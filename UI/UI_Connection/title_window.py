@@ -1,6 +1,7 @@
 from PyQt6 import uic
 from PyQt6.QtGui import QStandardItem, QStandardItemModel
-from PyQt6.QtWidgets import QApplication, QMainWindow, QDialog, QHeaderView, QTableWidgetItem, QPushButton
+from PyQt6.QtWidgets import QApplication, QMainWindow, QDialog, QHeaderView, QTableWidgetItem, QPushButton, \
+    QAbstractItemView
 from PyQt6.QtCore import Qt
 from Core.search import search_in_dictionary
 from Core.session import state, UserSession
@@ -26,6 +27,7 @@ class Title(QMainWindow):
         self.model = QStandardItemModel()
         self.model.setHorizontalHeaderLabels(["Word", "Translation", "Word progress", "Last review"])
         self.tree = self.treeView
+        self.tree.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
         self.tree.setModel(self.model)
 
         self.to_fill_tree()
@@ -34,6 +36,14 @@ class Title(QMainWindow):
         self.searched_words_table.setSortingEnabled(True)  # Sorting with click on heading
 
         self.forget_me_btn.clicked.connect(self.handle_forget_me)
+
+
+        self.add_folder_btn.clicked.connect(self.handle_add_folder
+                                            )
+
+    def handle_add_folder(self):
+        text =  self.folder_name_input.text().strip()
+
 
     def handle_forget_me(self):
         log.info("Send to executor function")
